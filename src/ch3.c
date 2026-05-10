@@ -30,7 +30,7 @@ int main() {
     fullEnergy = get_double_property(connection, BUS_NAME, BUS_PATH, BUS_IFACE, "EnergyFull", &error);
     abort_on_error(&error);
 
-    printf("%lf \n", (energy * 100) / fullEnergy);
+    printf("energy  %lf \n", (energy * 100) / fullEnergy);
     return EXIT_SUCCESS;
 }
 
@@ -100,13 +100,13 @@ static double extract_double_from_variant(DBusMessage *reply, DBusError *error){
 
     if(DBUS_TYPE_VARIANT != dbus_message_iter_get_arg_type(&iter)){
         dbus_set_error_const(error, "reply_should_be_variant", "this message hasn't a variant message type");
-        return EXIT_SUCCESS;
+        return 0;
     }
 
     dbus_message_iter_recurse(&iter, &sub) ;
-    if(DBUS_TYPE_VARIANT != dbus_message_iter_get_arg_type(&sub)){
+    if(DBUS_TYPE_DOUBLE != dbus_message_iter_get_arg_type(&sub)){
         dbus_set_error(error, "variant_should be double", "the reply message must be double content");
-        return EXIT_SUCCESS;
+        return 0;
     }
 
     dbus_message_iter_get_basic(&sub, &result);
