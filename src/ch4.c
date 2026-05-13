@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 static void check_and_abort(DBusError *error);
 static DBusHandlerResult tutorial_message(DBusConnection *connection, DBusMessage *message, void *user_data);
@@ -26,7 +27,7 @@ int main(void) {
 
     dbus_connection_try_register_object_path(
         connection, 
-        "it/interface/camel/DBusTutorial",
+        "/it/interface/camel/DBusTutorial",
         &vtable,
         NULL, &error
     );
@@ -61,7 +62,7 @@ other handlers.
 */
 static DBusHandlerResult tutorial_message(DBusConnection *connection, DBusMessage *message, void *user_data){
     const char *interface_name = dbus_message_get_interface(message);
-    const char *member_name = dbus_message_get_number(message);
+    const char *member_name = dbus_message_get_member(message);
 
     if(
         0 == strcmp("org.freedesktop.DBus.Introspectable", interface_name) &&
@@ -87,6 +88,7 @@ static void respond_to_introspect(DBusConnection *connction, DBusMessage *reques
     const char *intospection_data = 
 		" <!DOCTYPE node PUBLIC \"-//freedesktop//DTD D-BUS Object Introspection 1.0//EN\" "
 		"\"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd\">"
+        " <node>"
 		" <!-- dbus-sharp 0.8.1 -->"
         "   <interface name=\"org.freedesktop.DBus.Introspectable\">"
 		"     <method name=\"Introspect\">"
@@ -109,7 +111,7 @@ static void respond_to_introspect(DBusConnection *connction, DBusMessage *reques
         DBUS_TYPE_INVALID
     );
     dbus_connection_send(connction, reply, NULL);
-    dbus_message_inref(reply);
+    dbus_message_unref(reply);
 }
 
 static void respond_to_sum(DBusConnection *connection, DBusMessage *request) {
@@ -120,7 +122,7 @@ static void respond_to_sum(DBusConnection *connection, DBusMessage *request) {
     dbus_error_init(&error);
 
     dbus_message_get_args(
-        reply, 
+        request, 
         &error, 
         DBUS_TYPE_INT32, &a,
         DBUS_TYPE_INT32, &b,
@@ -130,7 +132,7 @@ static void respond_to_sum(DBusConnection *connection, DBusMessage *request) {
     if(dbus_error_is_set(&error)) {
         reply = dbus_message_new_error(request, "wrong_arguments", "illegal argument to sum");
         dbus_connection_send(connection, reply, NULL);
-        dbus_connection_unref(reply);
+        dbus_message_unref(reply);
     }
 
     ret = a + b;

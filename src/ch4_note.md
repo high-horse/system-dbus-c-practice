@@ -211,3 +211,33 @@ We use the `dbus_message_get_args` to read the incoming messages and the `dbus_m
 queue.
 
 This is our first DBus server! You can test it with d-feel double clicking on the Sum method and giving two number as 32,33. It will answer with the correct sum.
+
+
+#### Usage/Test
+
+```sh
+# intall with sudo apt install libglib2.0-bin
+# introspect
+gdbus introspect \
+  --session \
+  --dest it.interface.camel.DBusTutorial \
+  --object-path /it/interface/camel/DBusTutorial
+
+# method call "sum"
+gdbus call \
+  --session \
+  --dest it.interface.camel.DBusTutorial \
+  --object-path /it/interface/camel/DBusTutorial \
+  --method it.interface.camel.DBusTutorial.Sum \
+  10 20
+
+
+# using dbus-send
+dbus-send \
+  --session \
+  --dest=it.interface.camel.DBusTutorial \
+  --print-reply \
+  /it/interface/camel/DBusTutorial \
+  it.interface.camel.DBusTutorial.Sum \
+  int32:10 int32:20
+```
